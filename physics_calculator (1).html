@@ -1,0 +1,2114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #fbbf24;
+            --primary-dark: #f59e0b;
+            --primary-light: #fcd34d;
+            --secondary: #ffffff;
+            --bg-dark: #000000;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-dark: #000000;
+            --border: rgba(251, 191, 36, 0.3);
+            --shadow: rgba(251, 191, 36, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(251, 191, 36, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(251, 191, 36, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Particle effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, var(--primary), transparent),
+                radial-gradient(2px 2px at 60% 70%, var(--primary), transparent),
+                radial-gradient(1px 1px at 50% 50%, var(--primary), transparent),
+                radial-gradient(1px 1px at 80% 10%, var(--primary), transparent),
+                radial-gradient(2px 2px at 90% 60%, var(--primary), transparent),
+                radial-gradient(1px 1px at 33% 80%, var(--primary), transparent),
+                radial-gradient(1px 1px at 15% 90%, var(--primary), transparent);
+            background-size: 200% 200%;
+            animation: particleFloat 30s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+            25% { transform: translate(10px, -10px); opacity: 0.6; }
+            50% { transform: translate(-5px, 5px); opacity: 0.3; }
+            75% { transform: translate(5px, 10px); opacity: 0.5; }
+        }
+
+        /* Glowing orbs */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-orb-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--primary);
+            top: -250px;
+            left: -250px;
+            animation: orbFloat1 20s ease-in-out infinite;
+        }
+
+        .glow-orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            bottom: -200px;
+            right: -200px;
+            animation: orbFloat2 25s ease-in-out infinite;
+        }
+
+        .glow-orb-3 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: orbPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes orbFloat1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(100px, 100px); }
+        }
+
+        @keyframes orbFloat2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-80px, -80px); }
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.15; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.25; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 80px 20px 50px;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .header::before {
+            content: '⚛️';
+            font-size: 6em;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%) rotateY(0deg);
+            filter: drop-shadow(0 0 30px var(--primary));
+            animation: rotate3d 20s linear infinite;
+        }
+
+        @keyframes rotate3d {
+            0% { transform: translateX(-50%) rotateY(0deg) rotateX(0deg); }
+            25% { transform: translateX(-50%) rotateY(90deg) rotateX(10deg); }
+            50% { transform: translateX(-50%) rotateY(180deg) rotateX(0deg); }
+            75% { transform: translateX(-50%) rotateY(270deg) rotateX(-10deg); }
+            100% { transform: translateX(-50%) rotateY(360deg) rotateX(0deg); }
+        }
+
+        .header h1 {
+            font-size: 4.5em;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary) 0%, #ffffff 50%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            margin-bottom: 20px;
+            letter-spacing: -3px;
+            text-shadow: 0 0 80px rgba(251, 191, 36, 0.5);
+            animation: shimmer 3s linear infinite;
+            position: relative;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .header p {
+            font-size: 1.5em;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .mode-btn {
+            padding: 20px 16px;
+            border: 2px solid var(--border);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .mode-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--primary), transparent, var(--primary));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 10px 40px var(--shadow);
+        }
+
+        .mode-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .mode-btn:hover::after {
+            opacity: 1;
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: var(--text-dark);
+            border-color: var(--primary);
+            box-shadow: 0 10px 40px var(--shadow), 
+                        0 0 60px rgba(251, 191, 36, 0.4),
+                        inset 0 0 20px rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px) scale(1.05);
+            animation: activeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes activeGlow {
+            0%, 100% { box-shadow: 0 10px 40px var(--shadow), 0 0 60px rgba(251, 191, 36, 0.4); }
+            50% { box-shadow: 0 10px 40px var(--shadow), 0 0 80px rgba(251, 191, 36, 0.6); }
+        }
+
+        .calculator-body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+
+        .calculation-section {
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(30px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 2px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 100px rgba(251, 191, 36, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calculation-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(251, 191, 36, 0.03) 50%, 
+                transparent 70%);
+            animation: scanLine 10s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .calculation-section.active {
+            display: block;
+            animation: sectionAppear 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes sectionAppear {
+            0% { 
+                opacity: 0; 
+                transform: perspective(1000px) rotateX(-20deg) translateY(50px);
+            }
+            100% { 
+                opacity: 1; 
+                transform: perspective(1000px) rotateX(0deg) translateY(0);
+            }
+        }
+
+        .input-group {
+            margin-bottom: 28px;
+            position: relative;
+            animation: slideInLeft 0.6s ease backwards;
+        }
+
+        .input-group:nth-child(1) { animation-delay: 0.1s; }
+        .input-group:nth-child(2) { animation-delay: 0.15s; }
+        .input-group:nth-child(3) { animation-delay: 0.2s; }
+        .input-group:nth-child(4) { animation-delay: 0.25s; }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px) rotateY(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) rotateY(0deg);
+            }
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            font-size: 1.15em;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--text-primary);
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1),
+                        0 0 40px rgba(251, 191, 36, 0.3),
+                        inset 0 0 20px rgba(251, 191, 36, 0.05);
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 22px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--text-dark);
+            border: none;
+            border-radius: 16px;
+            font-size: 1.3em;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 20px;
+            box-shadow: 0 10px 40px var(--shadow);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .calculate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.5), 
+                transparent);
+            transition: left 0.6s;
+        }
+
+        .calculate-btn:hover::before {
+            left: 100%;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 50px var(--shadow),
+                        0 0 60px rgba(251, 191, 36, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .result {
+            margin-top: 35px;
+            padding: 35px;
+            background: rgba(251, 191, 36, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            display: none;
+            border: 2px solid rgba(251, 191, 36, 0.4);
+            box-shadow: 0 10px 40px rgba(251, 191, 36, 0.2),
+                        inset 0 0 30px rgba(251, 191, 36, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), transparent, var(--primary));
+            border-radius: 20px;
+            z-index: -1;
+            animation: borderRotate 4s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result.show {
+            display: block;
+            animation: resultExpand 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes resultExpand {
+            0% { 
+                opacity: 0;
+                transform: scale(0.9) rotateX(20deg);
+            }
+            100% { 
+                opacity: 1;
+                transform: scale(1) rotateX(0deg);
+            }
+        }
+
+        .result h3 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .result h3::before {
+            content: '⚡';
+            font-size: 1.3em;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+        }
+
+        .result-item {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.4s ease;
+            animation: resultSlideIn 0.6s ease backwards;
+            position: relative;
+        }
+
+        .result-item:nth-child(2) { animation-delay: 0.1s; }
+        .result-item:nth-child(3) { animation-delay: 0.15s; }
+        .result-item:nth-child(4) { animation-delay: 0.2s; }
+        .result-item:nth-child(5) { animation-delay: 0.25s; }
+        .result-item:nth-child(6) { animation-delay: 0.3s; }
+
+        @keyframes resultSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-item:hover {
+            background: rgba(251, 191, 36, 0.1);
+            padding-left: 20px;
+            padding-right: 20px;
+            margin: 0 -20px;
+            border-radius: 12px;
+            transform: translateX(5px);
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transform: translateY(-50%);
+            transition: width 0.4s ease;
+        }
+
+        .result-item:hover::before {
+            width: 10px;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1em;
+            flex: 1;
+        }
+
+        .result-value {
+            font-size: 1.6em;
+            color: var(--primary);
+            font-weight: 900;
+            text-align: right;
+            flex-shrink: 0;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+            animation: valueGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes valueGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+            50% { text-shadow: 0 0 30px rgba(251, 191, 36, 0.8); }
+        }
+
+        .formula-display {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 14px;
+            border-left: 5px solid var(--primary);
+            backdrop-filter: blur(10px);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.1);
+        }
+
+        .formula-display strong {
+            color: var(--primary);
+            font-size: 1.05em;
+            display: block;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        h4 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 1.25em;
+            font-weight: 900;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.8em;
+            }
+            
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .mode-selector {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .calculation-section {
+                padding: 25px;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .result-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .result-value {
+                text-align: left;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .mode-selector {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .mode-selector {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        /* Selection */
+        ::selection {
+            background: rgba(251, 191, 36, 0.4);
+            color: white;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading states */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .input-group input:focus::placeholder {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    <div class="glow-orb glow-orb-3"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>⚛️ Physics Calculator</h1>
+            <p>Advanced calculations for physicists</p>
+        </div>
+
+        <div class="calculator-body">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="kinematics">Kinematics</button>
+                <button class="mode-btn" data-mode="momentum">Momentum</button>
+                <button class="mode-btn" data-mode="rotation">Rotation</button>
+                <button class="mode-btn" data-mode="shm">SHM</button>
+                <button class="mode-btn" data-mode="projectile">Projectile</button>
+                <button class="mode-btn" data-mode="energy">Energy</button>
+                <button class="mode-btn" data-mode="forces">Forces</button>
+                <button class="mode-btn" data-mode="electricity">Electricity</button>
+                <button class="mode-btn" data-mode="waves">Waves</button>
+                <button class="mode-btn" data-mode="thermodynamics">Thermo</button>
+            </div>
+
+            <!-- Kinematics Section -->
+            <div id="kinematics" class="calculation-section active">
+                <div class="input-group">
+                    <label>Initial Velocity (m/s)</label>
+                    <input type="number" id="kin_v0" step="any" placeholder="0">
+                </div>
+                <div class="input-group">
+                    <label>Final Velocity (m/s)</label>
+                    <input type="number" id="kin_v" step="any" placeholder="Leave empty to calculate">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Acceleration (m/s²)</label>
+                        <input type="number" id="kin_a" step="any" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Time (s)</label>
+                        <input type="number" id="kin_t" step="any" placeholder="0">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Displacement (m)</label>
+                    <input type="number" id="kin_s" step="any" placeholder="Leave empty to calculate">
+                </div>
+                <button class="calculate-btn" onclick="calculateKinematics()">Calculate</button>
+                <div id="kin_result" class="result"></div>
+            </div>
+
+            <!-- Momentum Section -->
+            <div id="momentum" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="momentum_type" onchange="updateMomentumInputs()">
+                        <option value="linear">Linear Momentum (p = mv)</option>
+                        <option value="impulse">Impulse-Momentum (FΔt = Δp)</option>
+                        <option value="collision">Collision (Conservation)</option>
+                    </select>
+                </div>
+                <div id="momentum_inputs"></div>
+                <button class="calculate-btn" onclick="calculateMomentum()">Calculate</button>
+                <div id="momentum_result" class="result"></div>
+            </div>
+
+            <!-- Rotational Motion Section -->
+            <div id="rotation" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="rotation_type" onchange="updateRotationInputs()">
+                        <option value="angular">Angular Velocity & Acceleration</option>
+                        <option value="torque">Torque (τ = rF sin θ)</option>
+                        <option value="inertia">Moment of Inertia</option>
+                        <option value="angular_momentum">Angular Momentum (L = Iω)</option>
+                    </select>
+                </div>
+                <div id="rotation_inputs"></div>
+                <button class="calculate-btn" onclick="calculateRotation()">Calculate</button>
+                <div id="rotation_result" class="result"></div>
+            </div>
+
+            <!-- Simple Harmonic Motion Section -->
+            <div id="shm" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="shm_type" onchange="updateSHMInputs()">
+                        <option value="spring">Spring Oscillator</option>
+                        <option value="pendulum">Simple Pendulum</option>
+                        <option value="energy_shm">Energy in SHM</option>
+                    </select>
+                </div>
+                <div id="shm_inputs"></div>
+                <button class="calculate-btn" onclick="calculateSHM()">Calculate</button>
+                <div id="shm_result" class="result"></div>
+            </div>
+
+            <!-- Projectile Motion Section -->
+            <div id="projectile" class="calculation-section">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Initial Velocity (m/s)</label>
+                        <input type="number" id="proj_v0" step="any" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Launch Angle (degrees)</label>
+                        <input type="number" id="proj_angle" step="any" placeholder="45">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Initial Height (m)</label>
+                        <input type="number" id="proj_h0" step="any" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Gravity (m/s²)</label>
+                        <input type="number" id="proj_g" step="any" value="9.81">
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateProjectile()">Calculate</button>
+                <div id="projectile_result" class="result"></div>
+            </div>
+
+            <!-- Energy Section -->
+            <div id="energy" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="energy_type" onchange="updateEnergyInputs()">
+                        <option value="kinetic">Kinetic Energy</option>
+                        <option value="potential">Gravitational Potential Energy</option>
+                        <option value="elastic">Elastic Potential Energy</option>
+                        <option value="work">Work Done</option>
+                    </select>
+                </div>
+                <div id="energy_inputs"></div>
+                <button class="calculate-btn" onclick="calculateEnergy()">Calculate</button>
+                <div id="energy_result" class="result"></div>
+            </div>
+
+            <!-- Forces Section -->
+            <div id="forces" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="force_type" onchange="updateForceInputs()">
+                        <option value="newton2">Newton's 2nd Law (F = ma)</option>
+                        <option value="weight">Weight (W = mg)</option>
+                        <option value="friction">Friction Force</option>
+                        <option value="centripetal">Centripetal Force</option>
+                    </select>
+                </div>
+                <div id="force_inputs"></div>
+                <button class="calculate-btn" onclick="calculateForce()">Calculate</button>
+                <div id="force_result" class="result"></div>
+            </div>
+
+            <!-- Electricity Section -->
+            <div id="electricity" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="elec_type" onchange="updateElecInputs()">
+                        <option value="ohm">Ohm's Law (V = IR)</option>
+                        <option value="power">Electrical Power</option>
+                        <option value="resistance">Resistance (Series/Parallel)</option>
+                        <option value="capacitance">Capacitance</option>
+                    </select>
+                </div>
+                <div id="elec_inputs"></div>
+                <button class="calculate-btn" onclick="calculateElectricity()">Calculate</button>
+                <div id="elec_result" class="result"></div>
+            </div>
+
+            <!-- Waves Section -->
+            <div id="waves" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="wave_type" onchange="updateWaveInputs()">
+                        <option value="basic">Wave Speed (v = fλ)</option>
+                        <option value="doppler">Doppler Effect</option>
+                        <option value="interference">Wave Interference</option>
+                    </select>
+                </div>
+                <div id="wave_inputs"></div>
+                <button class="calculate-btn" onclick="calculateWaves()">Calculate</button>
+                <div id="wave_result" class="result"></div>
+            </div>
+
+            <!-- Thermodynamics Section -->
+            <div id="thermodynamics" class="calculation-section">
+                <div class="input-group">
+                    <label>Calculation Type</label>
+                    <select id="thermo_type" onchange="updateThermoInputs()">
+                        <option value="heat">Heat Transfer (Q = mcΔT)</option>
+                        <option value="ideal_gas">Ideal Gas Law (PV = nRT)</option>
+                        <option value="efficiency">Heat Engine Efficiency</option>
+                    </select>
+                </div>
+                <div id="thermo_inputs"></div>
+                <button class="calculate-btn" onclick="calculateThermodynamics()">Calculate</button>
+                <div id="thermo_result" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mode switching
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.calculation-section').forEach(s => s.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.mode).classList.add('active');
+            });
+        });
+
+        // Kinematics Calculator
+        function calculateKinematics() {
+            const v0 = parseFloat(document.getElementById('kin_v0').value) || 0;
+            const v = parseFloat(document.getElementById('kin_v').value);
+            const a = parseFloat(document.getElementById('kin_a').value) || 0;
+            const t = parseFloat(document.getElementById('kin_t').value) || 0;
+            const s = parseFloat(document.getElementById('kin_s').value);
+
+            let results = [];
+            let formulas = [];
+
+            // v = v0 + at
+            if (!isNaN(v)) {
+                const calculated_v = v0 + a * t;
+                results.push({ label: 'Final Velocity', value: `${calculated_v.toFixed(3)} m/s` });
+                formulas.push('v = v₀ + at');
+            } else if (t > 0) {
+                const calculated_v = v0 + a * t;
+                results.push({ label: 'Final Velocity', value: `${calculated_v.toFixed(3)} m/s` });
+                formulas.push('v = v₀ + at');
+            }
+
+            // s = v0*t + 0.5*a*t^2
+            if (t > 0) {
+                const calculated_s = v0 * t + 0.5 * a * t * t;
+                results.push({ label: 'Displacement', value: `${calculated_s.toFixed(3)} m` });
+                formulas.push('s = v₀t + ½at²');
+            }
+
+            // v^2 = v0^2 + 2as
+            if (!isNaN(s) && s !== 0) {
+                const v_squared = v0 * v0 + 2 * a * s;
+                if (v_squared >= 0) {
+                    const calculated_v = Math.sqrt(v_squared);
+                    results.push({ label: 'Final Velocity (from displacement)', value: `${calculated_v.toFixed(3)} m/s` });
+                    formulas.push('v² = v₀² + 2as');
+                }
+            }
+
+            // Average velocity
+            if (results.length > 0) {
+                const avg_v = (v0 + (v0 + a * t)) / 2;
+                results.push({ label: 'Average Velocity', value: `${avg_v.toFixed(3)} m/s` });
+            }
+
+            displayResults('kin_result', results, formulas);
+        }
+
+        // Momentum Calculator
+        function updateMomentumInputs() {
+            const type = document.getElementById('momentum_type').value;
+            const container = document.getElementById('momentum_inputs');
+            
+            let html = '';
+            if (type === 'linear') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="mom_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Velocity (m/s)</label>
+                            <input type="number" id="mom_v" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'impulse') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Force (N)</label>
+                            <input type="number" id="mom_f" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Time (s)</label>
+                            <input type="number" id="mom_t" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Mass (kg)</label>
+                        <input type="number" id="mom_m" step="any" placeholder="0">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Initial Velocity (m/s)</label>
+                            <input type="number" id="mom_v0" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Final Velocity (m/s)</label>
+                            <input type="number" id="mom_vf" step="any" placeholder="Leave empty to calculate">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'collision') {
+                html = `
+                    <div class="input-group">
+                        <label>Collision Type</label>
+                        <select id="mom_collision_type">
+                            <option value="elastic">Elastic (e = 1)</option>
+                            <option value="inelastic">Perfectly Inelastic (e = 0)</option>
+                            <option value="partial">Partially Inelastic</option>
+                        </select>
+                    </div>
+                    <h4 style="margin-top: 20px; color: #667eea;">Object 1</h4>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass 1 (kg)</label>
+                            <input type="number" id="mom_m1" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Initial Velocity 1 (m/s)</label>
+                            <input type="number" id="mom_u1" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <h4 style="margin-top: 15px; color: #667eea;">Object 2</h4>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass 2 (kg)</label>
+                            <input type="number" id="mom_m2" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Initial Velocity 2 (m/s)</label>
+                            <input type="number" id="mom_u2" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group" id="coeff_restitution_group" style="display: none;">
+                        <label>Coefficient of Restitution (e)</label>
+                        <input type="number" id="mom_e" step="any" min="0" max="1" placeholder="0.5">
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            
+            if (type === 'collision') {
+                document.getElementById('mom_collision_type').addEventListener('change', function() {
+                    const group = document.getElementById('coeff_restitution_group');
+                    group.style.display = this.value === 'partial' ? 'block' : 'none';
+                });
+            }
+        }
+
+        function calculateMomentum() {
+            const type = document.getElementById('momentum_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'linear') {
+                const m = parseFloat(document.getElementById('mom_m').value) || 0;
+                const v = parseFloat(document.getElementById('mom_v').value) || 0;
+                const p = m * v;
+                const KE = 0.5 * m * v * v;
+                
+                results.push({ label: 'Momentum', value: `${p.toFixed(3)} kg·m/s` });
+                results.push({ label: 'Kinetic Energy', value: `${KE.toFixed(3)} J` });
+                formulas.push('p = mv');
+            } else if (type === 'impulse') {
+                const F = parseFloat(document.getElementById('mom_f').value) || 0;
+                const t = parseFloat(document.getElementById('mom_t').value) || 0;
+                const m = parseFloat(document.getElementById('mom_m').value) || 0;
+                const v0 = parseFloat(document.getElementById('mom_v0').value) || 0;
+                const vf = parseFloat(document.getElementById('mom_vf').value);
+                
+                const impulse = F * t;
+                results.push({ label: 'Impulse', value: `${impulse.toFixed(3)} N·s` });
+                
+                if (m !== 0) {
+                    const deltaV = impulse / m;
+                    const calc_vf = v0 + deltaV;
+                    results.push({ label: 'Change in Velocity', value: `${deltaV.toFixed(3)} m/s` });
+                    results.push({ label: 'Final Velocity', value: `${calc_vf.toFixed(3)} m/s` });
+                }
+                
+                formulas.push('Impulse = FΔt = Δp = mΔv');
+            } else if (type === 'collision') {
+                const collisionType = document.getElementById('mom_collision_type').value;
+                const m1 = parseFloat(document.getElementById('mom_m1').value) || 0;
+                const u1 = parseFloat(document.getElementById('mom_u1').value) || 0;
+                const m2 = parseFloat(document.getElementById('mom_m2').value) || 0;
+                const u2 = parseFloat(document.getElementById('mom_u2').value) || 0;
+                
+                const p_initial = m1 * u1 + m2 * u2;
+                results.push({ label: 'Initial Total Momentum', value: `${p_initial.toFixed(3)} kg·m/s` });
+                
+                let v1, v2;
+                
+                if (collisionType === 'inelastic') {
+                    // Perfectly inelastic - objects stick together
+                    const v_final = p_initial / (m1 + m2);
+                    v1 = v2 = v_final;
+                    results.push({ label: 'Final Velocity (both)', value: `${v_final.toFixed(3)} m/s` });
+                } else {
+                    // Elastic or partially elastic
+                    const e = collisionType === 'elastic' ? 1 : (parseFloat(document.getElementById('mom_e').value) || 0.5);
+                    
+                    // Using conservation of momentum and coefficient of restitution
+                    v1 = ((m1 - e * m2) * u1 + m2 * (1 + e) * u2) / (m1 + m2);
+                    v2 = ((m2 - e * m1) * u2 + m1 * (1 + e) * u1) / (m1 + m2);
+                    
+                    results.push({ label: 'Final Velocity 1', value: `${v1.toFixed(3)} m/s` });
+                    results.push({ label: 'Final Velocity 2', value: `${v2.toFixed(3)} m/s` });
+                    
+                    if (collisionType === 'partial') {
+                        results.push({ label: 'Coefficient of Restitution', value: `${e.toFixed(3)}` });
+                    }
+                }
+                
+                const p_final = m1 * v1 + m2 * v2;
+                const KE_initial = 0.5 * m1 * u1 * u1 + 0.5 * m2 * u2 * u2;
+                const KE_final = 0.5 * m1 * v1 * v1 + 0.5 * m2 * v2 * v2;
+                const KE_lost = KE_initial - KE_final;
+                
+                results.push({ label: 'Final Total Momentum', value: `${p_final.toFixed(3)} kg·m/s` });
+                results.push({ label: 'Initial KE', value: `${KE_initial.toFixed(3)} J` });
+                results.push({ label: 'Final KE', value: `${KE_final.toFixed(3)} J` });
+                results.push({ label: 'Energy Lost', value: `${KE_lost.toFixed(3)} J` });
+                
+                formulas.push('p₁ + p₂ = constant, e = (v₂-v₁)/(u₁-u₂)');
+            }
+
+            displayResults('momentum_result', results, formulas);
+        }
+
+        // Rotational Motion Calculator
+        function updateRotationInputs() {
+            const type = document.getElementById('rotation_type').value;
+            const container = document.getElementById('rotation_inputs');
+            
+            let html = '';
+            if (type === 'angular') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Angular Velocity (rad/s)</label>
+                            <input type="number" id="rot_omega" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Radius (m)</label>
+                            <input type="number" id="rot_r" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Angular Acceleration (rad/s²)</label>
+                            <input type="number" id="rot_alpha" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Time (s)</label>
+                            <input type="number" id="rot_t" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'torque') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Force (N)</label>
+                            <input type="number" id="rot_f" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Radius (m)</label>
+                            <input type="number" id="rot_r" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Angle from radius (degrees)</label>
+                        <input type="number" id="rot_theta" step="any" value="90">
+                    </div>
+                `;
+            } else if (type === 'inertia') {
+                html = `
+                    <div class="input-group">
+                        <label>Object Type</label>
+                        <select id="rot_object">
+                            <option value="point">Point Mass</option>
+                            <option value="rod_center">Thin Rod (axis through center)</option>
+                            <option value="rod_end">Thin Rod (axis through end)</option>
+                            <option value="disk">Solid Disk/Cylinder</option>
+                            <option value="sphere">Solid Sphere</option>
+                            <option value="hollow_sphere">Hollow Sphere</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="rot_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Radius/Length (m)</label>
+                            <input type="number" id="rot_r" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'angular_momentum') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Moment of Inertia (kg·m²)</label>
+                            <input type="number" id="rot_i" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Angular Velocity (rad/s)</label>
+                            <input type="number" id="rot_omega" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateRotation() {
+            const type = document.getElementById('rotation_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'angular') {
+                const omega = parseFloat(document.getElementById('rot_omega').value) || 0;
+                const r = parseFloat(document.getElementById('rot_r').value) || 0;
+                const alpha = parseFloat(document.getElementById('rot_alpha').value) || 0;
+                const t = parseFloat(document.getElementById('rot_t').value) || 0;
+                
+                const v_tangential = omega * r;
+                const a_tangential = alpha * r;
+                const a_centripetal = omega * omega * r;
+                const theta = omega * t + 0.5 * alpha * t * t;
+                const omega_final = omega + alpha * t;
+                
+                results.push({ label: 'Tangential Velocity', value: `${v_tangential.toFixed(3)} m/s` });
+                results.push({ label: 'Tangential Acceleration', value: `${a_tangential.toFixed(3)} m/s²` });
+                results.push({ label: 'Centripetal Acceleration', value: `${a_centripetal.toFixed(3)} m/s²` });
+                results.push({ label: 'Angular Displacement', value: `${theta.toFixed(3)} rad` });
+                results.push({ label: 'Final Angular Velocity', value: `${omega_final.toFixed(3)} rad/s` });
+                
+                formulas.push('v = ωr, a_c = ω²r, θ = ωt + ½αt²');
+            } else if (type === 'torque') {
+                const F = parseFloat(document.getElementById('rot_f').value) || 0;
+                const r = parseFloat(document.getElementById('rot_r').value) || 0;
+                const theta = parseFloat(document.getElementById('rot_theta').value) || 90;
+                
+                const torque = F * r * Math.sin(theta * Math.PI / 180);
+                
+                results.push({ label: 'Torque', value: `${torque.toFixed(3)} N·m` });
+                formulas.push('τ = rF sin(θ)');
+            } else if (type === 'inertia') {
+                const objType = document.getElementById('rot_object').value;
+                const m = parseFloat(document.getElementById('rot_m').value) || 0;
+                const r = parseFloat(document.getElementById('rot_r').value) || 0;
+                
+                let I, formula;
+                
+                switch(objType) {
+                    case 'point':
+                        I = m * r * r;
+                        formula = 'I = mr²';
+                        break;
+                    case 'rod_center':
+                        I = (1/12) * m * r * r;
+                        formula = 'I = (1/12)mL²';
+                        break;
+                    case 'rod_end':
+                        I = (1/3) * m * r * r;
+                        formula = 'I = (1/3)mL²';
+                        break;
+                    case 'disk':
+                        I = 0.5 * m * r * r;
+                        formula = 'I = (1/2)mr²';
+                        break;
+                    case 'sphere':
+                        I = (2/5) * m * r * r;
+                        formula = 'I = (2/5)mr²';
+                        break;
+                    case 'hollow_sphere':
+                        I = (2/3) * m * r * r;
+                        formula = 'I = (2/3)mr²';
+                        break;
+                }
+                
+                results.push({ label: 'Moment of Inertia', value: `${I.toFixed(6)} kg·m²` });
+                formulas.push(formula);
+            } else if (type === 'angular_momentum') {
+                const I = parseFloat(document.getElementById('rot_i').value) || 0;
+                const omega = parseFloat(document.getElementById('rot_omega').value) || 0;
+                
+                const L = I * omega;
+                const KE_rot = 0.5 * I * omega * omega;
+                
+                results.push({ label: 'Angular Momentum', value: `${L.toFixed(3)} kg·m²/s` });
+                results.push({ label: 'Rotational KE', value: `${KE_rot.toFixed(3)} J` });
+                formulas.push('L = Iω, KE = ½Iω²');
+            }
+
+            displayResults('rotation_result', results, formulas);
+        }
+
+        // Simple Harmonic Motion Calculator
+        function updateSHMInputs() {
+            const type = document.getElementById('shm_type').value;
+            const container = document.getElementById('shm_inputs');
+            
+            let html = '';
+            if (type === 'spring') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="shm_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Spring Constant (N/m)</label>
+                            <input type="number" id="shm_k" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Amplitude (m)</label>
+                        <input type="number" id="shm_a" step="any" placeholder="0">
+                    </div>
+                `;
+            } else if (type === 'pendulum') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Length (m)</label>
+                            <input type="number" id="shm_l" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Gravity (m/s²)</label>
+                            <input type="number" id="shm_g" step="any" value="9.81">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Angular Amplitude (degrees)</label>
+                        <input type="number" id="shm_theta" step="any" placeholder="10">
+                    </div>
+                `;
+            } else if (type === 'energy_shm') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="shm_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Spring Constant (N/m)</label>
+                            <input type="number" id="shm_k" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Amplitude (m)</label>
+                            <input type="number" id="shm_a" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Displacement (m)</label>
+                            <input type="number" id="shm_x" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateSHM() {
+            const type = document.getElementById('shm_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'spring') {
+                const m = parseFloat(document.getElementById('shm_m').value) || 0;
+                const k = parseFloat(document.getElementById('shm_k').value) || 0;
+                const A = parseFloat(document.getElementById('shm_a').value) || 0;
+                
+                if (m > 0 && k > 0) {
+                    const omega = Math.sqrt(k / m);
+                    const T = 2 * Math.PI / omega;
+                    const f = 1 / T;
+                    const v_max = omega * A;
+                    const a_max = omega * omega * A;
+                    
+                    results.push({ label: 'Angular Frequency (ω)', value: `${omega.toFixed(3)} rad/s` });
+                    results.push({ label: 'Period', value: `${T.toFixed(3)} s` });
+                    results.push({ label: 'Frequency', value: `${f.toFixed(3)} Hz` });
+                    results.push({ label: 'Max Velocity', value: `${v_max.toFixed(3)} m/s` });
+                    results.push({ label: 'Max Acceleration', value: `${a_max.toFixed(3)} m/s²` });
+                    
+                    formulas.push('ω = √(k/m), T = 2π/ω, v_max = ωA');
+                }
+            } else if (type === 'pendulum') {
+                const L = parseFloat(document.getElementById('shm_l').value) || 0;
+                const g = parseFloat(document.getElementById('shm_g').value) || 9.81;
+                const theta = parseFloat(document.getElementById('shm_theta').value) || 10;
+                
+                if (L > 0 && g > 0) {
+                    const T = 2 * Math.PI * Math.sqrt(L / g);
+                    const f = 1 / T;
+                    const omega = 2 * Math.PI * f;
+                    
+                    // Max velocity for small angles
+                    const theta_rad = theta * Math.PI / 180;
+                    const v_max = Math.sqrt(2 * g * L * (1 - Math.cos(theta_rad)));
+                    
+                    results.push({ label: 'Period', value: `${T.toFixed(3)} s` });
+                    results.push({ label: 'Frequency', value: `${f.toFixed(3)} Hz` });
+                    results.push({ label: 'Angular Frequency', value: `${omega.toFixed(3)} rad/s` });
+                    results.push({ label: 'Max Velocity', value: `${v_max.toFixed(3)} m/s` });
+                    
+                    formulas.push('T = 2π√(L/g)');
+                }
+            } else if (type === 'energy_shm') {
+                const m = parseFloat(document.getElementById('shm_m').value) || 0;
+                const k = parseFloat(document.getElementById('shm_k').value) || 0;
+                const A = parseFloat(document.getElementById('shm_a').value) || 0;
+                const x = parseFloat(document.getElementById('shm_x').value) || 0;
+                
+                const E_total = 0.5 * k * A * A;
+                const PE = 0.5 * k * x * x;
+                const KE = E_total - PE;
+                
+                if (KE >= 0) {
+                    const v = Math.sqrt(2 * KE / m);
+                    
+                    results.push({ label: 'Total Energy', value: `${E_total.toFixed(6)} J` });
+                    results.push({ label: 'Potential Energy', value: `${PE.toFixed(6)} J` });
+                    results.push({ label: 'Kinetic Energy', value: `${KE.toFixed(6)} J` });
+                    results.push({ label: 'Velocity at x', value: `${v.toFixed(3)} m/s` });
+                    
+                    formulas.push('E = ½kA², PE = ½kx², KE = E - PE');
+                }
+            }
+
+            displayResults('shm_result', results, formulas);
+        }
+
+        // Projectile Motion Calculator
+        function calculateProjectile() {
+            const v0 = parseFloat(document.getElementById('proj_v0').value) || 0;
+            const angle = parseFloat(document.getElementById('proj_angle').value) || 45;
+            const h0 = parseFloat(document.getElementById('proj_h0').value) || 0;
+            const g = parseFloat(document.getElementById('proj_g').value) || 9.81;
+            
+            const angle_rad = angle * Math.PI / 180;
+            const v0x = v0 * Math.cos(angle_rad);
+            const v0y = v0 * Math.sin(angle_rad);
+            
+            // Time to reach max height
+            const t_max = v0y / g;
+            
+            // Max height above starting point
+            const h_max = (v0y * v0y) / (2 * g);
+            
+            // Total time of flight
+            const t_total = (v0y + Math.sqrt(v0y * v0y + 2 * g * h0)) / g;
+            
+            // Range
+            const range = v0x * t_total;
+            
+            // Final velocity components
+            const vfy = v0y - g * t_total;
+            const vf = Math.sqrt(v0x * v0x + vfy * vfy);
+            
+            let results = [];
+            
+            results.push({ label: 'Horizontal Velocity', value: `${v0x.toFixed(3)} m/s` });
+            results.push({ label: 'Initial Vertical Velocity', value: `${v0y.toFixed(3)} m/s` });
+            results.push({ label: 'Time to Max Height', value: `${t_max.toFixed(3)} s` });
+            results.push({ label: 'Maximum Height', value: `${(h0 + h_max).toFixed(3)} m` });
+            results.push({ label: 'Total Flight Time', value: `${t_total.toFixed(3)} s` });
+            results.push({ label: 'Range', value: `${range.toFixed(3)} m` });
+            results.push({ label: 'Final Velocity', value: `${vf.toFixed(3)} m/s` });
+            
+            let formulas = ['v_x = v₀cos(θ), v_y = v₀sin(θ)', 'R = v₀²sin(2θ)/g', 'h_max = v₀²sin²(θ)/(2g)'];
+            
+            displayResults('projectile_result', results, formulas);
+        }
+
+        // Energy Calculator
+        function updateEnergyInputs() {
+            const type = document.getElementById('energy_type').value;
+            const container = document.getElementById('energy_inputs');
+            
+            let html = '';
+            if (type === 'kinetic') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="energy_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Velocity (m/s)</label>
+                            <input type="number" id="energy_v" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'potential') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="energy_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Height (m)</label>
+                            <input type="number" id="energy_h" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Gravity (m/s²)</label>
+                        <input type="number" id="energy_g" step="any" value="9.81">
+                    </div>
+                `;
+            } else if (type === 'elastic') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Spring Constant (N/m)</label>
+                            <input type="number" id="energy_k" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Extension (m)</label>
+                            <input type="number" id="energy_x" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'work') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Force (N)</label>
+                            <input type="number" id="energy_f" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Distance (m)</label>
+                            <input type="number" id="energy_d" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Angle (degrees)</label>
+                        <input type="number" id="energy_angle" step="any" value="0">
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateEnergy() {
+            const type = document.getElementById('energy_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'kinetic') {
+                const m = parseFloat(document.getElementById('energy_m').value) || 0;
+                const v = parseFloat(document.getElementById('energy_v').value) || 0;
+                const KE = 0.5 * m * v * v;
+                results.push({ label: 'Kinetic Energy', value: `${KE.toFixed(3)} J` });
+                formulas.push('KE = ½mv²');
+            } else if (type === 'potential') {
+                const m = parseFloat(document.getElementById('energy_m').value) || 0;
+                const h = parseFloat(document.getElementById('energy_h').value) || 0;
+                const g = parseFloat(document.getElementById('energy_g').value) || 9.81;
+                const PE = m * g * h;
+                results.push({ label: 'Potential Energy', value: `${PE.toFixed(3)} J` });
+                formulas.push('PE = mgh');
+            } else if (type === 'elastic') {
+                const k = parseFloat(document.getElementById('energy_k').value) || 0;
+                const x = parseFloat(document.getElementById('energy_x').value) || 0;
+                const EPE = 0.5 * k * x * x;
+                results.push({ label: 'Elastic Potential Energy', value: `${EPE.toFixed(3)} J` });
+                formulas.push('EPE = ½kx²');
+            } else if (type === 'work') {
+                const f = parseFloat(document.getElementById('energy_f').value) || 0;
+                const d = parseFloat(document.getElementById('energy_d').value) || 0;
+                const angle = parseFloat(document.getElementById('energy_angle').value) || 0;
+                const W = f * d * Math.cos(angle * Math.PI / 180);
+                results.push({ label: 'Work Done', value: `${W.toFixed(3)} J` });
+                formulas.push('W = Fd cos(θ)');
+            }
+
+            displayResults('energy_result', results, formulas);
+        }
+
+        // Force Calculator
+        function updateForceInputs() {
+            const type = document.getElementById('force_type').value;
+            const container = document.getElementById('force_inputs');
+            
+            let html = '';
+            if (type === 'newton2') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="force_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Acceleration (m/s²)</label>
+                            <input type="number" id="force_a" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'weight') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mass (kg)</label>
+                            <input type="number" id="force_m" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Gravity (m/s²)</label>
+                            <input type="number" id="force_g" step="any" value="9.81">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'friction') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Normal Force (N)</label>
+                            <input type="number" id="force_n" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Coefficient of Friction (μ)</label>
+                            <input type="number" id="force_mu" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'centripetal') {
+                html = `
+                    <div class="input-group">
+                        <label>Mass (kg)</label>
+                        <input type="number" id="force_m" step="any" placeholder="0">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Velocity (m/s)</label>
+                            <input type="number" id="force_v" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Radius (m)</label>
+                            <input type="number" id="force_r" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateForce() {
+            const type = document.getElementById('force_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'newton2') {
+                const m = parseFloat(document.getElementById('force_m').value) || 0;
+                const a = parseFloat(document.getElementById('force_a').value) || 0;
+                const F = m * a;
+                results.push({ label: 'Force', value: `${F.toFixed(3)} N` });
+                formulas.push('F = ma');
+            } else if (type === 'weight') {
+                const m = parseFloat(document.getElementById('force_m').value) || 0;
+                const g = parseFloat(document.getElementById('force_g').value) || 9.81;
+                const W = m * g;
+                results.push({ label: 'Weight', value: `${W.toFixed(3)} N` });
+                formulas.push('W = mg');
+            } else if (type === 'friction') {
+                const N = parseFloat(document.getElementById('force_n').value) || 0;
+                const mu = parseFloat(document.getElementById('force_mu').value) || 0;
+                const F = mu * N;
+                results.push({ label: 'Friction Force', value: `${F.toFixed(3)} N` });
+                formulas.push('F = μN');
+            } else if (type === 'centripetal') {
+                const m = parseFloat(document.getElementById('force_m').value) || 0;
+                const v = parseFloat(document.getElementById('force_v').value) || 0;
+                const r = parseFloat(document.getElementById('force_r').value) || 0;
+                if (r !== 0) {
+                    const F = (m * v * v) / r;
+                    results.push({ label: 'Centripetal Force', value: `${F.toFixed(3)} N` });
+                    formulas.push('F = mv²/r');
+                }
+            }
+
+            displayResults('force_result', results, formulas);
+        }
+
+        // Electricity Calculator
+        function updateElecInputs() {
+            const type = document.getElementById('elec_type').value;
+            const container = document.getElementById('elec_inputs');
+            
+            let html = '';
+            if (type === 'ohm') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Voltage (V)</label>
+                            <input type="number" id="elec_v" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Current (A)</label>
+                            <input type="number" id="elec_i" step="any" placeholder="Leave empty to calculate">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Resistance (Ω)</label>
+                        <input type="number" id="elec_r" step="any" placeholder="Leave empty to calculate">
+                    </div>
+                `;
+            } else if (type === 'power') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Voltage (V)</label>
+                            <input type="number" id="elec_v" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Current (A)</label>
+                            <input type="number" id="elec_i" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'resistance') {
+                html = `
+                    <div class="input-group">
+                        <label>Configuration</label>
+                        <select id="elec_config">
+                            <option value="series">Series</option>
+                            <option value="parallel">Parallel</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Resistor 1 (Ω)</label>
+                        <input type="number" id="elec_r1" step="any" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Resistor 2 (Ω)</label>
+                        <input type="number" id="elec_r2" step="any" placeholder="0">
+                    </div>
+                `;
+            } else if (type === 'capacitance') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Capacitance (F)</label>
+                            <input type="number" id="elec_c" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Voltage (V)</label>
+                            <input type="number" id="elec_v" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateElectricity() {
+            const type = document.getElementById('elec_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'ohm') {
+                const V = parseFloat(document.getElementById('elec_v').value) || 0;
+                const I = parseFloat(document.getElementById('elec_i').value);
+                const R = parseFloat(document.getElementById('elec_r').value);
+
+                if (isNaN(I) && !isNaN(R) && R !== 0) {
+                    const calc_I = V / R;
+                    results.push({ label: 'Current', value: `${calc_I.toFixed(6)} A` });
+                }
+                if (isNaN(R) && !isNaN(I) && I !== 0) {
+                    const calc_R = V / I;
+                    results.push({ label: 'Resistance', value: `${calc_R.toFixed(3)} Ω` });
+                }
+                if (!isNaN(I) && !isNaN(R)) {
+                    results.push({ label: 'Voltage', value: `${V.toFixed(3)} V` });
+                    results.push({ label: 'Current', value: `${I.toFixed(6)} A` });
+                    results.push({ label: 'Resistance', value: `${R.toFixed(3)} Ω` });
+                }
+                formulas.push('V = IR');
+            } else if (type === 'power') {
+                const V = parseFloat(document.getElementById('elec_v').value) || 0;
+                const I = parseFloat(document.getElementById('elec_i').value) || 0;
+                const P = V * I;
+                results.push({ label: 'Power', value: `${P.toFixed(3)} W` });
+                formulas.push('P = VI');
+            } else if (type === 'resistance') {
+                const config = document.getElementById('elec_config').value;
+                const R1 = parseFloat(document.getElementById('elec_r1').value) || 0;
+                const R2 = parseFloat(document.getElementById('elec_r2').value) || 0;
+                
+                if (config === 'series') {
+                    const R_total = R1 + R2;
+                    results.push({ label: 'Total Resistance (Series)', value: `${R_total.toFixed(3)} Ω` });
+                    formulas.push('R_total = R₁ + R₂');
+                } else {
+                    if (R1 !== 0 && R2 !== 0) {
+                        const R_total = (R1 * R2) / (R1 + R2);
+                        results.push({ label: 'Total Resistance (Parallel)', value: `${R_total.toFixed(3)} Ω` });
+                        formulas.push('1/R_total = 1/R₁ + 1/R₂');
+                    }
+                }
+            } else if (type === 'capacitance') {
+                const C = parseFloat(document.getElementById('elec_c').value) || 0;
+                const V = parseFloat(document.getElementById('elec_v').value) || 0;
+                const Q = C * V;
+                const E = 0.5 * C * V * V;
+                results.push({ label: 'Charge', value: `${Q.toFixed(9)} C` });
+                results.push({ label: 'Energy Stored', value: `${E.toFixed(6)} J` });
+                formulas.push('Q = CV, E = ½CV²');
+            }
+
+            displayResults('elec_result', results, formulas);
+        }
+
+        // Wave Calculator
+        function updateWaveInputs() {
+            const type = document.getElementById('wave_type').value;
+            const container = document.getElementById('wave_inputs');
+            
+            let html = '';
+            if (type === 'basic') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Frequency (Hz)</label>
+                            <input type="number" id="wave_f" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Wavelength (m)</label>
+                            <input type="number" id="wave_lambda" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'doppler') {
+                html = `
+                    <div class="input-group">
+                        <label>Source Frequency (Hz)</label>
+                        <input type="number" id="wave_f0" step="any" placeholder="0">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Wave Speed (m/s)</label>
+                            <input type="number" id="wave_v" step="any" value="343">
+                        </div>
+                        <div class="input-group">
+                            <label>Source Velocity (m/s)</label>
+                            <input type="number" id="wave_vs" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Observer Velocity (m/s)</label>
+                        <input type="number" id="wave_vo" step="any" placeholder="0">
+                    </div>
+                `;
+            } else if (type === 'interference') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Wavelength (m)</label>
+                            <input type="number" id="wave_lambda" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Path Difference (m)</label>
+                            <input type="number" id="wave_path_diff" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateWaves() {
+            const type = document.getElementById('wave_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'basic') {
+                const f = parseFloat(document.getElementById('wave_f').value) || 0;
+                const lambda = parseFloat(document.getElementById('wave_lambda').value) || 0;
+                const v = f * lambda;
+                const T = f !== 0 ? 1 / f : 0;
+                
+                results.push({ label: 'Wave Speed', value: `${v.toFixed(3)} m/s` });
+                results.push({ label: 'Period', value: `${T.toFixed(6)} s` });
+                formulas.push('v = fλ, T = 1/f');
+            } else if (type === 'doppler') {
+                const f0 = parseFloat(document.getElementById('wave_f0').value) || 0;
+                const v = parseFloat(document.getElementById('wave_v').value) || 343;
+                const vs = parseFloat(document.getElementById('wave_vs').value) || 0;
+                const vo = parseFloat(document.getElementById('wave_vo').value) || 0;
+                
+                const f = f0 * ((v + vo) / (v - vs));
+                results.push({ label: 'Observed Frequency', value: `${f.toFixed(3)} Hz` });
+                results.push({ label: 'Frequency Shift', value: `${(f - f0).toFixed(3)} Hz` });
+                formulas.push('f = f₀(v + v_o)/(v - v_s)');
+            } else if (type === 'interference') {
+                const lambda = parseFloat(document.getElementById('wave_lambda').value) || 0;
+                const path_diff = parseFloat(document.getElementById('wave_path_diff').value) || 0;
+                
+                if (lambda !== 0) {
+                    const n = path_diff / lambda;
+                    const type = Math.abs(n - Math.round(n)) < 0.01 ? 'Constructive' : 
+                                Math.abs(n - Math.round(n) + 0.5) < 0.01 ? 'Destructive' : 'Partial';
+                    
+                    results.push({ label: 'Path Difference / λ', value: n.toFixed(3) });
+                    results.push({ label: 'Interference Type', value: type });
+                    formulas.push('Constructive: Δx = nλ, Destructive: Δx = (n+½)λ');
+                }
+            }
+
+            displayResults('wave_result', results, formulas);
+        }
+
+        // Thermodynamics Calculator
+        function updateThermoInputs() {
+            const type = document.getElementById('thermo_type').value;
+            const container = document.getElementById('thermo_inputs');
+            
+            let html = '';
+            if (type === 'heat') {
+                html = `
+                    <div class="input-group">
+                        <label>Mass (kg)</label>
+                        <input type="number" id="thermo_m" step="any" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Specific Heat Capacity (J/kg·K)</label>
+                        <input type="number" id="thermo_c" step="any" placeholder="4186 for water">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Initial Temperature (°C)</label>
+                            <input type="number" id="thermo_t1" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Final Temperature (°C)</label>
+                            <input type="number" id="thermo_t2" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'ideal_gas') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Pressure (Pa)</label>
+                            <input type="number" id="thermo_p" step="any" placeholder="101325">
+                        </div>
+                        <div class="input-group">
+                            <label>Volume (m³)</label>
+                            <input type="number" id="thermo_v" step="any" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Number of Moles (n)</label>
+                            <input type="number" id="thermo_n" step="any" placeholder="Leave empty to calculate">
+                        </div>
+                        <div class="input-group">
+                            <label>Temperature (K)</label>
+                            <input type="number" id="thermo_t" step="any" placeholder="273.15">
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'efficiency') {
+                html = `
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Hot Temperature (K)</label>
+                            <input type="number" id="thermo_th" step="any" placeholder="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Cold Temperature (K)</label>
+                            <input type="number" id="thermo_tc" step="any" placeholder="0">
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calculateThermodynamics() {
+            const type = document.getElementById('thermo_type').value;
+            let results = [];
+            let formulas = [];
+
+            if (type === 'heat') {
+                const m = parseFloat(document.getElementById('thermo_m').value) || 0;
+                const c = parseFloat(document.getElementById('thermo_c').value) || 0;
+                const t1 = parseFloat(document.getElementById('thermo_t1').value) || 0;
+                const t2 = parseFloat(document.getElementById('thermo_t2').value) || 0;
+                const deltaT = t2 - t1;
+                const Q = m * c * deltaT;
+                
+                results.push({ label: 'Heat Transfer', value: `${Q.toFixed(3)} J` });
+                results.push({ label: 'Temperature Change', value: `${deltaT.toFixed(3)} K` });
+                formulas.push('Q = mcΔT');
+            } else if (type === 'ideal_gas') {
+                const P = parseFloat(document.getElementById('thermo_p').value) || 101325;
+                const V = parseFloat(document.getElementById('thermo_v').value) || 0;
+                const n = parseFloat(document.getElementById('thermo_n').value);
+                const T = parseFloat(document.getElementById('thermo_t').value) || 273.15;
+                const R = 8.314; // J/(mol·K)
+                
+                if (isNaN(n)) {
+                    const calc_n = (P * V) / (R * T);
+                    results.push({ label: 'Number of Moles', value: `${calc_n.toFixed(6)} mol` });
+                }
+                
+                results.push({ label: 'Gas Constant (R)', value: `${R} J/(mol·K)` });
+                formulas.push('PV = nRT');
+            } else if (type === 'efficiency') {
+                const Th = parseFloat(document.getElementById('thermo_th').value) || 0;
+                const Tc = parseFloat(document.getElementById('thermo_tc').value) || 0;
+                
+                if (Th !== 0) {
+                    const efficiency = (1 - (Tc / Th)) * 100;
+                    results.push({ label: 'Carnot Efficiency', value: `${efficiency.toFixed(2)}%` });
+                    formulas.push('η = 1 - T_c/T_h');
+                }
+            }
+
+            displayResults('thermo_result', results, formulas);
+        }
+
+        // Display results helper
+        function displayResults(resultId, results, formulas) {
+            const resultDiv = document.getElementById(resultId);
+            
+            if (results.length === 0) {
+                resultDiv.innerHTML = '<p style="color: #888;">Please enter values to calculate.</p>';
+                resultDiv.classList.add('show');
+                return;
+            }
+
+            let html = '<h3>Results</h3>';
+            results.forEach(result => {
+                html += `
+                    <div class="result-item">
+                        <span class="result-label">${result.label}:</span>
+                        <span class="result-value">${result.value}</span>
+                    </div>
+                `;
+            });
+
+            if (formulas.length > 0) {
+                html += `
+                    <div class="formula-display">
+                        <strong>Formula${formulas.length > 1 ? 's' : ''}:</strong> ${formulas.join(', ')}
+                    </div>
+                `;
+            }
+
+            resultDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+
+        // Initialize
+        updateMomentumInputs();
+        updateRotationInputs();
+        updateSHMInputs();
+        updateEnergyInputs();
+        updateForceInputs();
+        updateElecInputs();
+        updateWaveInputs();
+        updateThermoInputs();
+    </script>
+</body>
+</html>
